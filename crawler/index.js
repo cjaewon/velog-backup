@@ -97,11 +97,10 @@ class Crawler {
     body = body.replace(regex, (_, url) => {
       const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-');
       const path = join('backup', 'images', filename);
-
       axios({
         method: 'get',
-        url,
-        responseType: 'stream'
+        url: encodeURI(url),
+        responseType: 'stream',
       })
       .then(resp => resp.data.pipe(fs.createWriteStream(path)))
       .catch(e => console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`));
