@@ -95,11 +95,12 @@ class Crawler {
     const regex = /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/g;
 
     body = body.replace(regex, (_, url) => {
-      const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-');
-      const path = join('backup', 'images', filename);
+      const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-').trim();
+      const path = join('backup', 'images', decodeURI(filename));
+
       axios({
         method: 'get',
-        url: encodeURI(url),
+        url: encodeURI(decodeURI(url)),
         responseType: 'stream',
       })
       .then(resp => resp.data.pipe(fs.createWriteStream(path)))
