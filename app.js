@@ -10,4 +10,4 @@ program.parse(process.argv);
 
 const crawler = new Crawler(program.username);
 
-console.log(crawler.getPosts());
+console.log(JSON.stringify(crawler.parse()));
