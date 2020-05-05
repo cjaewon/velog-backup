@@ -7,6 +7,8 @@
 ### 📁 velog (벨로그)의 글을 마크다운 및 이미지로 백업을 해주는 툴 입니다.  
 원하는 기능이 있으시면 이슈를 만들어주시면 감사하겠습니다!
 
+![](https://media.vlpt.us/images/jwn4492/post/07149c42-9707-48c6-b44a-c47d7c52fc1a/ezgif-2-5d5273beba63.gif)
+
 - Velog에 올린 글을 백업 해두고 싶을 때
 - Github Pages와 Velog를 같이 사용하고 싶을 때
 
