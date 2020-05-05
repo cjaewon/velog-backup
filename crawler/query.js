@@ -1,8 +1,9 @@
-const PostsQuery = (username) => ({
+const PostsQuery = (username, cursor = null) => ({
   operationName:'Posts',
   variables: {
     username,
     tag: null,
+    cursor,
   },
 
   query: `query Posts($cursor: ID, $username: String, $temp_only: Boolean, $tag: String, $limit: Int) {

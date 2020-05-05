@@ -5,8 +5,11 @@ const { join } = require('path');
 const { PostsQuery, PostQuery } = require('./query');
 
 class Crawler {
-  constructor(username) {
-    this.username = username;
+  constructor(username, { delay }) {
+    this.username = username; 
+
+    // options
+    this.delay = delay;
 
     this.__grahpqlURL = 'https://v2.velog.io/graphql';
   }
@@ -14,7 +17,9 @@ class Crawler {
   async parse() {
     const posts = await this.getPosts();
     
-    posts.map(async(postInfo, i) => {
+    posts.map(async(postInfo, i) => { 
+      if (this.delay > 0) await new Promise(r => setTimeout(r, this.delay * i));
+
       let post = await this.getPost(postInfo.url_slug);
       post.body = await this.getImage(post.body);
 
@@ -26,6 +31,7 @@ class Crawler {
   async getPosts() {
     const url = `https://velog.io/@${this.username}`;
     let response;
+    let posts = [];
 
     try {
       await axios.get(url);
@@ -38,14 +44,21 @@ class Crawler {
       console.error(e);
     }
 
-    try {
-      response = await axios.post(this.__grahpqlURL, PostsQuery(this.username));
-    } catch(e) {
-      console.error(`⚠️  벨로그에서 글 목록을 가져오는데 실패했습니다. \n error = ${e}`);
-      process.exit(1);
+    while (true) {
+      try {
+        if (response && response.data.data.posts.length >= 20) {
+          response = await axios.post(this.__grahpqlURL, PostsQuery(this.username, posts[posts.length - 1].id));
+        } else {
+          response = await axios.post(this.__grahpqlURL, PostsQuery(this.username));
+        }
+      } catch(e) {
+        console.error(`⚠️  벨로그에서 글 목록을 가져오는데 실패했습니다. \n error = ${e}`);
+        process.exit(1);
+      }
+      
+      posts = [...posts, ...response.data.data.posts];
+      if (response.data.data.posts.length < 20) break;
     }
-  
-    const posts = response.data.data.posts;
 
     console.log(`✅ ${this.username}님의 모든 글(${posts.length} 개) 을 가져옴`);
 
@@ -89,7 +102,9 @@ class Crawler {
         method: 'get',
         url,
         responseType: 'stream'
-      }).then(resp => resp.data.pipe(fs.createWriteStream(path)));
+      })
+      .then(resp => resp.data.pipe(fs.createWriteStream(path)))
+      .catch(e => console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`));
 
       return `![](/images/${filename})`;
     });
