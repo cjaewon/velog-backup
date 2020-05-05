@@ -16,13 +16,11 @@ class Crawler {
     
     posts.map(async(postInfo, i) => {
       let post = await this.getPost(postInfo.url_slug);
-
       post.body = await this.getImage(post.body);
+
       await this.writePost(post);
-
-      console.log(`✅ " ${post.title} " 백업 (${i + 1}/${posts.length})`);
+      console.log(`✅ " ${post.title} " 백업 완료`);
     });
-
   }
 
   async getPosts() {
