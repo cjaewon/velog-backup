@@ -22,10 +22,19 @@ Velog에 올린 글 중 이미지를 포함하고 있으면 자동으로 이미�
 ## 👋 사용법
 
 ```bash
-git clone https://github.com/cjaewon/velog-backup
+> git clone https://github.com/cjaewon/velog-backup
+> cd velog-backup
 
-cd velog-backup
-node app.js -u <유저 이름>
+> node app.js --help
+Usage: app [options]
+
+Options:
+  -V, --version              output the version number
+  -u, --username <username>  velog 유저이름
+  -d, --delay <ms>           요청 딜레이 시간
+  -h, --help                 display help for command
+
+> node app.js -u <유저 이름>
 
 📙 백업을 시작합니다 / velog-backup
 ✅ <유저 이름>님의 모든 글(2 개) 을 가져옴
