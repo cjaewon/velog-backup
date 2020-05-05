@@ -1,6 +1,6 @@
 # velog-backup
 
-![License](https://img.shields.io/packagist/l/cjaewon/velog-backup?style=flat-square)
+![License](https://img.shields.io/github/license/cjaewon/velog-backup?style=flat-square)
 ![Star](https://img.shields.io/github/stars/cjaewon/velog-backup?style=flat-square)
 ![HitCount](http://hits.dwyl.com/cjaewon/velog-backup.svg)
 
