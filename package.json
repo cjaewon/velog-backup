@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/cjaewon/velog-backup#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "commander": "^5.1.0"
   }
 }
