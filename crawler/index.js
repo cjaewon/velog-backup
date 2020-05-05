@@ -1,6 +1,6 @@
 const axios = require('axios');
+const fs = require('fs');
 const { join } = require('path');
-const fs = require('fs').promises;
 
 const { PostsQuery, PostQuery } = require('./query');
 
@@ -15,9 +15,11 @@ class Crawler {
     const posts = await this.getPosts();
     
     posts.map(async(postInfo, i) => {
-      const post = await this.getPost(postInfo.url_slug);
+      let post = await this.getPost(postInfo.url_slug);
 
+      post.body = await this.getImage(post.body);
       await this.writePost(post);
+
       console.log(`✅ " ${post.title} " 백업 (${i + 1}/${posts.length})`);
     });
 
@@ -66,7 +68,7 @@ class Crawler {
   }
 
   async writePost(post) {
-    const path = join('./backup', `${post.title}.md`);
+    const path = join('backup', 'content', `${post.title.replace(/\//g, ' ')}.md`);
 
     post.body = '---\n'
                 + `title: "${post.title}"\n`
@@ -75,10 +77,27 @@ class Crawler {
                 + `tags: ${JSON.stringify(post.tags)}\n`
                 + '---\n' + post.body;
                 
-    await fs.writeFile(path, post.body, 'utf8');
+    await fs.promises.writeFile(path, post.body, 'utf8');
   }
 
+  async getImage(body) {
+    const regex = /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/g;
 
+    body = body.replace(regex, (_, url) => {
+      const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-');
+      const path = join('backup', 'images', filename);
+
+      axios({
+        method: 'get',
+        url,
+        responseType: 'stream'
+      }).then(resp => resp.data.pipe(fs.createWriteStream(path)));
+
+      return `![](/images/${filename})`;
+    });
+
+    return body;
+  }
 };
 
 module.exports = Crawler;
