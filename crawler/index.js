@@ -71,7 +71,7 @@ class Crawler {
     try {
       response = await axios.post(this.__grahpqlURL, PostQuery(this.username, url_slug));
     } catch (e) {
-      console.error(`⚠️  벨로그에서 글을 가져오는데 실패했습니다. \n error = ${e}`);
+      console.error(`⚠️  벨로그에서 글을 가져오는데 실패했습니다. \n error = ${e} url = ${url_slug}`);
       process.exit(1);
     }
     
@@ -92,12 +92,14 @@ class Crawler {
   }
 
   async getImage(body) {
-    const regex = /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/g;
-
+    const regex = /!\[[^\]]*\]\((.*?.png|.jpeg|.jpg|.webp|.svg|.gif|.tiff)\s*("(?:.*[^"])")?\s*\)|!\[[^\]]*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/g;
+    
     body = body.replace(regex, (_, url) => {
+      if (!url) return;
+
       const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-').trim();
       const path = join('backup', 'images', decodeURI(filename));
-
+      
       axios({
         method: 'get',
         url: encodeURI(decodeURI(url)),
@@ -111,6 +113,7 @@ class Crawler {
 
     return body;
   }
+
 };
 
 module.exports = Crawler;
