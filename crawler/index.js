@@ -79,7 +79,7 @@ class Crawler {
   }
 
   async writePost(post) {
-    const path = join('backup', 'content', `${post.title.replace(/\//g, ' ')}.md`);
+    const path = join('backup', 'content', `${post.title.replace(/\//g, ' ').replace(':','-')}.md`);
 
     post.body = '---\n'
                 + `title: "${post.title}"\n`
