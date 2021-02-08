@@ -14,11 +14,9 @@ program.parse(process.argv);
 !fs.existsSync('./backup/content') && fs.mkdirSync('./backup/content');
 !fs.existsSync('./backup/images') && fs.mkdirSync('./backup/images');
 
-
-
 const crawler = new Crawler(program.username, { 
   delay: program.delay || 0,
- });
+});
 
-console.log('📙 백업을 시작합니다 / velog-backup')
-crawler.parse()
+console.log('📙 백업을 시작합니다 / velog-backup');
+crawler.parse();

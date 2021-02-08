@@ -79,7 +79,14 @@ class Crawler {
   }
 
   async writePost(post) {
-    const path = join('backup', 'content', `${post.title.replace(/\//g, ' ').replace(':','-')}.md`);
+    const excludedChar = ['\\', '/', ':' ,'*' ,'?' ,'"' ,'<' ,'>' ,'|'];
+    let title = post.title;
+
+    for (const char of excludedChar) {
+      title = title.replace(char, '');
+    }
+
+    const path = join('backup', 'content', `${title}.md`);
 
     post.body = '---\n'
                 + `title: "${post.title}"\n`
