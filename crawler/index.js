@@ -5,13 +5,19 @@ const { join } = require('path');
 const { PostsQuery, PostQuery } = require('./query');
 
 class Crawler {
-  constructor(username, { delay }) {
+  constructor(username, { delay, cert }) {
     this.username = username; 
 
     // options
     this.delay = delay;
+    this.cert = cert;
 
     this.__grahpqlURL = 'https://v2.velog.io/graphql';
+    this.__api = axios.create({
+      headers:{
+        Cookie: cert ? `access_token=${cert};` : null,
+      }, 
+    });
   }
 
   async parse() {
@@ -34,7 +40,7 @@ class Crawler {
     let posts = [];
 
     try {
-      await axios.get(url);
+      await this.__api.get(url);
     } catch (e) {
       if (e.response.status === 404) {
         console.error(`⚠️  해당 유저를 찾을 수 없어요 \n username = ${this.username}`);
@@ -47,9 +53,9 @@ class Crawler {
     while (true) {
       try {
         if (response && response.data.data.posts.length >= 20) {
-          response = await axios.post(this.__grahpqlURL, PostsQuery(this.username, posts[posts.length - 1].id));
+          response = await this.__api.post(this.__grahpqlURL, PostsQuery(this.username, posts[posts.length - 1].id));
         } else {
-          response = await axios.post(this.__grahpqlURL, PostsQuery(this.username));
+          response = await this.__api.post(this.__grahpqlURL, PostsQuery(this.username));
         }
       } catch(e) {
         console.error(`⚠️  벨로그에서 글 목록을 가져오는데 실패했습니다. \n error = ${e}`);
@@ -69,7 +75,7 @@ class Crawler {
     let response;
 
     try {
-      response = await axios.post(this.__grahpqlURL, PostQuery(this.username, url_slug));
+      response = await this.__api.post(this.__grahpqlURL, PostQuery(this.username, url_slug));
     } catch (e) {
       console.error(`⚠️  벨로그에서 글을 가져오는데 실패했습니다. \n error = ${e} url = ${url_slug}`);
       process.exit(1);
@@ -107,7 +113,7 @@ class Crawler {
       const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-').trim();
       const path = join('backup', 'images', decodeURI(filename));
       
-      axios({
+      this.__api({
         method: 'get',
         url: encodeURI(decodeURI(url)),
         responseType: 'stream',
