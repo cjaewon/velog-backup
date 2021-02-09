@@ -1,21 +1,35 @@
 {
   "name": "velog-backup",
-  "version": "0.0.1",
-  "description": "velog backup tool",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "version": "1.0.1",
+  "description": "CLI tool for archive Velog posts",
+  "keywords": [
+    "velog",
+    "backup",
+    "archive"
+  ],
+  "author": "Cjaewon <jwn4492@outlook.com> (https://github.com/cjaewon)",
+  "license": "MIT",
+  "homepage": "https://github.com/cjaewon/velog-backup",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cjaewon/velog-backup.git"
   },
-  "author": "",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/cjaewon/velog-backup/issues"
   },
-  "homepage": "https://github.com/cjaewon/velog-backup#readme",
+
+  "main": "./app.js",
+  "files": [
+    "app.js",
+    "crawler/"
+  ],
+  "bin": {
+    "velog-backup": "./app.js"
+  },
+  "engines": {
+    "node": ">=8.0"
+  },
+
   "dependencies": {
     "axios": "^0.21.1",
     "commander": "^5.1.0"

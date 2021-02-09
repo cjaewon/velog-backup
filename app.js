@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const { Command } = require('commander');
 const fs = require('fs');
 const Crawler = require('./crawler');
