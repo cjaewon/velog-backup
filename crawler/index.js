@@ -8,6 +8,11 @@ class Crawler {
   constructor(username, { delay, cert }) {
     this.username = username; 
 
+    if (!username) {
+      console.error('❌ 유저이름을 입력해주세요')
+      process.exit(1);
+    }
+
     // options
     this.delay = delay;
     this.cert = cert;
