@@ -34,16 +34,23 @@ Options:
   -V, --version              output the version number
   -u, --username <username>  velog 유저이름
   -d, --delay <ms>           요청 딜레이 시간
+  -c, --cert <access_token>  velog 유저 access_token
   -h, --help                 display help for command
 
 > node app.js -u <유저 이름>
 
 📙 백업을 시작합니다 / velog-backup
-✅ <유저 이름>님의 모든 글(2 개) 을 가져옴
-✅ " velog-backup vs velog-frontup " 백업 완료
-✅ " Nodejs 27.5.0 performance is faster than C " 백업 완료
+✅ <유저 이름>님의 모든 글(3 개) 을 가져옴
+✅ " 🐦 serverless 로 날아다니기 " 백업 완료
+✅ " Github Action으로 매일마다 브리핑 받기! " 백업 완료
+✅ " Github 이스터에그 " 백업 완료
 ```
+### 옵션
+- `username` : 필수 옵션으로 백업 할 유저를 선택합니다.
+- `delay` : 백업 요청 딜레이 시간을 넣을 때 사용됩니다.
+- `cert` : 비공개 글을 같이 가져오고 싶을 때 가능합니다. [참고](https://github.com/cjaewon/velog-backup/issues/4)   
 
+### 백업 위치
 백업 된 파일은 `backup` 폴더 안에 저장되어 있습니다.
 
 ![image](https://user-images.githubusercontent.com/32125218/81049982-3af00c80-8efa-11ea-8b2b-8b90827b4d1e.png)
