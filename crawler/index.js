@@ -90,11 +90,12 @@ class Crawler {
   }
 
   async writePost(post) {
-    const excludedChar = ['\\', '/', ':' ,'*' ,'?' ,'"' ,'<' ,'>' ,'|'];
+    const excludedChar = ['\\\\', '/', ':' ,'\\*' ,'\\?' ,'"' ,'<' ,'>' ,'\\|'];
     let title = post.title;
 
     for (const char of excludedChar) {
-      title = title.replace(char, '');
+      const re = new RegExp(char, 'g');
+      title = title.replace(re, '');
     }
 
     const path = join('backup', 'content', `${title}.md`);
