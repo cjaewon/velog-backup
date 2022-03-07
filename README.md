@@ -1,9 +1,5 @@
 # velog-backup
 
-![License](https://img.shields.io/github/license/cjaewon/velog-backup?style=flat-square)
-![Star](https://img.shields.io/github/stars/cjaewon/velog-backup?style=flat-square)
-![HitCount](http://hits.dwyl.com/cjaewon/velog-backup.svg)
-
 ### 📁 velog (벨로그)의 글을 마크다운 및 이미지로 백업을 해주는 툴 입니다.  
 원하는 기능이 있으시면 이슈를 만들어주시면 감사하겠습니다!
 
@@ -26,6 +22,7 @@ Velog에 올린 글 중 이미지를 포함하고 있으면 자동으로 이미�
 ```bash
 > git clone https://github.com/cjaewon/velog-backup
 > cd velog-backup
+> npm install
 
 > node app.js --help
 Usage: app [options]
