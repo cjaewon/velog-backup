@@ -32,6 +32,11 @@ class Crawler {
       if (this.delay > 0) await new Promise(r => setTimeout(r, this.delay * i));
 
       let post = await this.getPost(postInfo.url_slug);
+      if (!post) {
+        console.log(`⚠️  " ${postInfo.url_slug} " 가져올 수 없는 글을 건너뛰었습니다.`);
+        return;
+      }
+
       post.body = await this.getImage(post.body);
 
       await this.writePost(post);
