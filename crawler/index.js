@@ -111,8 +111,19 @@ class Crawler {
                 + `date: ${post.released_at}\n`
                 + `tags: ${JSON.stringify(post.tags)}\n`
                 + '---\n' + post.body;
-                
-    await fs.promises.writeFile(path, post.body, 'utf8');
+    const wf = (path, body) => {
+      return new Promise((resolve, reject) => {
+        fs.writeFile(path, body, 'utf8', (err) => {
+          if (err != undefined) {
+            reject(err);
+          }
+          else {
+            resolve();
+          }
+        });
+      }).catch((err) => console.log('error occured: ', err));
+    };     
+    wf(path, post.body);      
   }
 
   async getImage(body) {
