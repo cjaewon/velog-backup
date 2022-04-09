@@ -111,19 +111,12 @@ class Crawler {
                 + `date: ${post.released_at}\n`
                 + `tags: ${JSON.stringify(post.tags)}\n`
                 + '---\n' + post.body;
-    const wf = (path, body) => {
-      return new Promise((resolve, reject) => {
-        fs.writeFile(path, body, 'utf8', (err) => {
-          if (err != undefined) {
-            reject(err);
-          }
-          else {
-            resolve();
-          }
-        });
-      }).catch((err) => console.log('error occured: ', err));
-    };     
-    wf(path, post.body);      
+    
+    try {
+      await fs.promises.writeFile(path, post.body, 'utf8');
+    } catch (e) {
+      console.error(`⚠️ 파일을 쓰는데 문제가 발생했습니다. / error = ${e}  title = ${post.title}`);
+    }
   }
 
   async getImage(body) {
