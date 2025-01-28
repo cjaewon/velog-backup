@@ -4,7 +4,7 @@ const Crawler = require('./crawler');
 
 const program = new Command();
 
-program.version('1.0.2');
+program.version('1.0.3');
 program.option('-u, --username <username>', 'velog 유저이름');
 program.option('-d, --delay <ms>', '요청 딜레이 시간')
 program.option('-c, --cert <access_token>', 'velog 유저 access_token')
