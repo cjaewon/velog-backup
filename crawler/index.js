@@ -120,9 +120,9 @@ class Crawler {
   }
 
   async getImage(body) {
-    const regex = /!\[[^\]]*\]\((.*?.png|.*?.jpeg|.*?.jpg|.*?.webp|.*?.svg|.*?.gif|.*?.tiff)\s*("(?:.*[^"])")?\s*\)|!\[[^\]]*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/g;
+    const regex = /!\[([^\]]*)\]\((.*?.png|.*?.jpeg|.*?.jpg|.*?.webp|.*?.svg|.*?.gif|.*?.tiff)\s*("(?:.*[^"])")?\s*\)|!\[[^\]]*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/g;
     
-    body = body.replace(regex, (_, url) => {
+    body = body.replace(regex, (_, alt, url) => {
       if (!url) return;
 
       const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-').trim();
@@ -136,7 +136,7 @@ class Crawler {
       .then(resp => resp.data.pipe(fs.createWriteStream(path)))
       .catch(e => console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`));
 
-      return `![](/images/${filename})`;
+      return `![${alt}](/images/${filename})`;
     });
 
     return body;
