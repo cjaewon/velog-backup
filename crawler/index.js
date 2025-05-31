@@ -5,7 +5,7 @@ const { join } = require('path');
 const { PostsQuery, PostQuery } = require('./query');
 
 class Crawler {
-  constructor(username, { delay, cert }) {
+  constructor(username, { delay, cert, withDetail }) {
     this.username = username; 
 
     if (!username) {
@@ -16,6 +16,7 @@ class Crawler {
     // options
     this.delay = delay;
     this.cert = cert;
+    this.withDetail = withDetail;
 
     this.__grahpqlURL = 'https://v2.velog.io/graphql';
     this.__api = axios.create({
@@ -104,14 +105,29 @@ class Crawler {
     }
 
     const path = join('backup', 'content', `${title}.md`);
-
-    post.body = '---\n'
-                + `title: "${post.title}"\n`
-                + `description: "${post.short_description.replace(/\n/g, ' ')}"\n`
-                + `date: ${post.released_at}\n`
-                + `tags: ${JSON.stringify(post.tags)}\n`
-                + '---\n' + post.body;
+    let frontmatter = '---\n'
+                    + `title: "${post.title}"\n`
+                    + `description: "${post.short_description.replace(/\n/g, ' ')}"\n`
+                    + `date: ${post.released_at}\n`
+                    + `tags: ${JSON.stringify(post.tags)}\n`;
     
+    if (this.withDetail) {
+      if (post.thumbnail) {
+        this.getThumbnailImage(post.thumbnail);
+        frontmatter += `thumbnail: ${post.thumbnail}\n`;
+      }
+
+      if (post.series) {
+        frontmatter = frontmatter
+            + `series:\n`
+            + `  id: ${post.series.id}\n`
+            + `  name: ${post.series.name}\n`;
+      }
+    }
+
+    frontmatter += '---\n';
+    post.body = frontmatter + post.body;
+
     try {
       await fs.promises.writeFile(path, post.body, 'utf8');
     } catch (e) {
@@ -119,7 +135,7 @@ class Crawler {
     }
   }
 
-  async getImage(body) {
+  getImage(body) {
     const regex = /!\[([^\]]*)\]\((.*?.png|.*?.jpeg|.*?.jpg|.*?.webp|.*?.svg|.*?.gif|.*?.tiff)\s*("(?:.*[^"])")?\s*\)|!\[[^\]]*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/g;
     
     body = body.replace(regex, (_, alt, url) => {
@@ -142,6 +158,20 @@ class Crawler {
     return body;
   }
 
+  getThumbnailImage(url) {
+    const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-').trim();
+    const path = join('backup', 'images', decodeURI(filename));
+
+    this.__api({
+      method: 'get',
+      url: encodeURI(decodeURI(url)),
+      responseType: 'stream',
+    })
+    .then(resp => resp.data.pipe(fs.createWriteStream(path)))
+    .catch(e => console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`));
+
+    return `/images/${filename}`;
+  }
 };
 
 module.exports = Crawler;
