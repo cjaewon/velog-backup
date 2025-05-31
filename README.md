@@ -32,8 +32,8 @@ Options:
   -u, --username <username>  velog 유저이름
   -d, --delay <ms>           요청 딜레이 시간 (글이 많은 경우 딜레이 시간을 늘려주세요)
   -c, --cert <access_token>  velog 유저 access_token
+  -w, --with-detail          시리즈, 썸네일 같은 디테일한 정보 포함
   -h, --help                 display help for command
-
 > node app.js -u <유저 이름>
 
 📙 백업을 시작합니다 / velog-backup
@@ -46,6 +46,7 @@ Options:
 - `username` : 필수 옵션으로 백업 할 유저를 선택합니다.
 - `delay` : 백업 요청 딜레이 시간을 넣을 때 사용됩니다.
 - `cert` : 비공개 글을 같이 가져오고 싶을 때 가능합니다. [참고](https://github.com/cjaewon/velog-backup/issues/4)   
+- `with-detail` : 기본 정보 외에 시리즈 정보, 썸네일 정보를 마크다운 frontmatter에 함께 추가하고 싶을 때 사용됩니다. [참고](https://github.com/cjaewon/velog-backup/issues/22)
 
 ### 백업 위치
 백업 된 파일은 `backup` 폴더 안에 저장되어 있습니다.
