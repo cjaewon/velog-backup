@@ -113,8 +113,9 @@ class Crawler {
     
     if (this.withDetail) {
       if (post.thumbnail) {
-        this.getThumbnailImage(post.thumbnail);
-        frontmatter += `thumbnail: ${post.thumbnail}\n`;
+        const thumbnail_file_src = this.getThumbnailImage(post.thumbnail);
+
+        frontmatter += `thumbnail: ${thumbnail_file_src}\n`;
       }
 
       if (post.series) {
