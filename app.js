@@ -22,5 +22,12 @@ const crawler = new Crawler(program.username, {
   withDetail: program.withDetail || false,
 });
 
-console.log('📙 백업을 시작합니다 / velog-backup');
-crawler.parse();
+async function main() {
+  console.log('📙 백업을 시작합니다 / velog-backup');
+  await crawler.parse();
+}
+
+main().catch((e) => {
+  console.error(`⚠️ 백업 실행 중 오류가 발생했습니다. / error = ${e}`);
+  process.exit(1);
+});

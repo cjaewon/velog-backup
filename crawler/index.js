@@ -29,7 +29,7 @@ class Crawler {
   async parse() {
     const posts = await this.getPosts();
     
-    posts.map(async(postInfo, i) => { 
+    await Promise.all(posts.map(async(postInfo, i) => { 
       if (this.delay > 0) await new Promise(r => setTimeout(r, this.delay * i));
 
       let post = await this.getPost(postInfo.url_slug);
@@ -42,7 +42,7 @@ class Crawler {
 
       await this.writePost(post);
       console.log(`✅ " ${post.title} " 백업 완료`);
-    });
+    }));
   }
 
   async getPosts() {
