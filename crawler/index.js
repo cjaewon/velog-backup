@@ -113,7 +113,7 @@ class Crawler {
     
     if (this.withDetail) {
       if (post.thumbnail) {
-        const thumbnail_file_src = this.getThumbnailImage(post.thumbnail);
+        const thumbnail_file_src = await this.getThumbnailImage(post.thumbnail);
 
         frontmatter += `thumbnail: ${thumbnail_file_src}\n`;
       }
@@ -136,40 +136,50 @@ class Crawler {
     }
   }
 
-  getImage(body) {
+  async downloadImage(url, path) {
+    try {
+      const resp = await this.__api({
+        method: 'get',
+        url: encodeURI(decodeURI(url)),
+        responseType: 'stream',
+      });
+
+      await new Promise((resolve, reject) => {
+        const writer = fs.createWriteStream(path);
+        resp.data.pipe(writer);
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+        resp.data.on('error', reject);
+      });
+    } catch (e) {
+      console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`);
+    }
+  }
+
+  async getImage(body) {
     const regex = /!\[([^\]]*)\]\((.*?.png|.*?.jpeg|.*?.jpg|.*?.webp|.*?.svg|.*?.gif|.*?.tiff)\s*("(?:.*[^"])")?\s*\)|!\[[^\]]*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/g;
-    
+    const downloads = [];
+
     body = body.replace(regex, (_, alt, url) => {
       if (!url) return;
 
       const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-').trim();
       const path = join('backup', 'images', decodeURI(filename));
       
-      this.__api({
-        method: 'get',
-        url: encodeURI(decodeURI(url)),
-        responseType: 'stream',
-      })
-      .then(resp => resp.data.pipe(fs.createWriteStream(path)))
-      .catch(e => console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`));
+      downloads.push(this.downloadImage(url, path));
 
       return `![${alt}](/images/${filename})`;
     });
 
+    await Promise.all(downloads);
     return body;
   }
 
-  getThumbnailImage(url) {
+  async getThumbnailImage(url) {
     const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-').trim();
     const path = join('backup', 'images', decodeURI(filename));
 
-    this.__api({
-      method: 'get',
-      url: encodeURI(decodeURI(url)),
-      responseType: 'stream',
-    })
-    .then(resp => resp.data.pipe(fs.createWriteStream(path)))
-    .catch(e => console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`));
+    await this.downloadImage(url, path);
 
     return `/images/${filename}`;
   }
