@@ -1,8 +1,13 @@
-const axios = require('axios');
 const fs = require('fs');
 const { join } = require('path');
+const { Readable } = require('stream');
+const { pipeline } = require('stream/promises');
 
 const { PostsQuery, PostQuery } = require('./query');
+
+const DEFAULT_HEADERS = {
+  'Content-Type': 'application/json',
+};
 
 class Crawler {
   constructor(username, { delay, cert, withDetail }) {
@@ -19,11 +24,25 @@ class Crawler {
     this.withDetail = withDetail;
 
     this.__grahpqlURL = 'https://v2.velog.io/graphql';
-    this.__api = axios.create({
-      headers:{
-        Cookie: cert ? `access_token=${cert};` : null,
-      }, 
+    this.__headers = {
+      ...DEFAULT_HEADERS,
+      ...(cert ? { Cookie: `access_token=${cert};` } : {}),
+    };
+  }
+
+  async __request(url, options = {}) {
+    const response = await fetch(url, {
+      ...options,
+      headers: { ...this.__headers, ...options.headers },
     });
+    
+    if (!response.ok) {
+      const error = new Error(`HTTP ${response.status}`);
+      error.response = { status: response.status };
+      throw error;
+    }
+    
+    return response;
   }
 
   async parse() {
@@ -51,30 +70,41 @@ class Crawler {
     let posts = [];
 
     try {
-      await this.__api.get(url);
+      await this.__request(url);
     } catch (e) {
-      if (e.response.status === 404) {
+      if (e.response?.status === 404) {
         console.error(`⚠️  해당 유저를 찾을 수 없어요 \n username = ${this.username}`);
-        process.exit(1);
+      } else {
+        console.error(e);
       }
 
-      console.error(e);
+      process.exit(1);
     }
 
     while (true) {
       try {
-        if (response && response.data.data.posts.length >= 20) {
-          response = await this.__api.post(this.__grahpqlURL, PostsQuery(this.username, posts[posts.length - 1].id));
+        if (response && response.data.posts.length >= 20) {
+          response = await this.__request(this.__grahpqlURL, {
+            method: 'POST',
+            body: JSON.stringify(PostsQuery(this.username, posts[posts.length - 1].id)),
+          });
+
+          response = await response.json();
         } else {
-          response = await this.__api.post(this.__grahpqlURL, PostsQuery(this.username));
+          response = await this.__request(this.__grahpqlURL, {
+            method: 'POST',
+            body: JSON.stringify(PostsQuery(this.username)),
+          });
+          
+          response = await response.json();
         }
       } catch(e) {
         console.error(`⚠️  벨로그에서 글 목록을 가져오는데 실패했습니다. \n error = ${e}`);
         process.exit(1);
       }
       
-      posts = [...posts, ...response.data.data.posts];
-      if (response.data.data.posts.length < 20) break;
+      posts = [...posts, ...response.data.posts];
+      if (response.data.posts.length < 20) break;
     }
 
     console.log(`✅ ${this.username}님의 모든 글(${posts.length} 개) 을 가져옴`);
@@ -86,13 +116,17 @@ class Crawler {
     let response;
 
     try {
-      response = await this.__api.post(this.__grahpqlURL, PostQuery(this.username, url_slug));
+      response = await this.__request(this.__grahpqlURL, {
+        method: 'POST',
+        body: JSON.stringify(PostQuery(this.username, url_slug)),
+      });
+      response = await response.json();
     } catch (e) {
       console.error(`⚠️  벨로그에서 글을 가져오는데 실패했습니다. \n error = ${e} url = ${url_slug}`);
       process.exit(1);
     }
     
-    return response.data.data.post;
+    return response.data.post;
   }
 
   async writePost(post) {
@@ -138,19 +172,12 @@ class Crawler {
 
   async downloadImage(url, path) {
     try {
-      const resp = await this.__api({
-        method: 'get',
-        url: encodeURI(decodeURI(url)),
-        responseType: 'stream',
-      });
-
-      await new Promise((resolve, reject) => {
-        const writer = fs.createWriteStream(path);
-        resp.data.pipe(writer);
-        writer.on('finish', resolve);
-        writer.on('error', reject);
-        resp.data.on('error', reject);
-      });
+      const response = await this.__request(encodeURI(decodeURI(url)));
+      if (!response.body) throw new Error('response body is empty');
+      await pipeline(
+        Readable.fromWeb(response.body),
+        fs.createWriteStream(path),
+      );
     } catch (e) {
       console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`);
     }
