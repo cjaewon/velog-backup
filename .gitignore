@@ -104,3 +104,4 @@ dist
 .tern-port
 
 backup/
+.DS_Store
